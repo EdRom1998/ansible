@@ -46,6 +46,7 @@
       src: /opt/edu_ansible/target/JenkinsWar.war
       dest: /tmp/edu_ansible/JenkinsWar.war
       mode: push
+      private_key: ~/.ssh/id_rsa
   delegate_to: maven
 
   - name: Run Tomcat container
