@@ -1,3 +1,4 @@
+
 ---
 - name: Build WAR on maven
   hosts: maven
@@ -10,7 +11,6 @@
           - maven
           - git
           - python
-        state: present
 
     - name: Clean build dir
       file:
@@ -61,3 +61,4 @@
       service:
         name: tomcat9
         state: restarted
+...
