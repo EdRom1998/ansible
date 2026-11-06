@@ -14,22 +14,19 @@
       path: /opt/edu_ansible
       state: directory
 
-  - name: Ensure docker is present
+  - name: Install Maven, git and JDK
     apt:
-      name: python3-docker
+      name:
+        - maven
+        - git
+        - openjdk-21-jdk
       state: present
 
   - name: run build war file
-    docker_container:
-      name: maven
-      image: maven:3.9-eclipse-temurin-21
-      working_dir: /tmp/edu_ansible
-      volumes:
-          - "/opt/edu_ansible:/tmp/edu_ansible"
-      command: sh -c "git clone https://github.com/sivajavatechie/JenkinsWar . && mvn package -DskipTests"
-      state: started
-      detach: false
-      cleanup: true
+    shell: |
+      cd /opt/edu_ansible
+      git clone https://github.com/sivajavatechie/JenkinsWar .
+      mvn package -DskipTests
   
 - name: Deploy WAR to Tomcat on tomcat host
   hosts: tomcat
@@ -46,28 +43,22 @@
       path: /tmp/edu_ansible
       state: directory
 
-  - name: Ensure docker is present
+  - name: Install Tomcat
     apt:
-      name: python3-docker
+      name: tomcat9
       state: present
 
   - name: Push WAR from maven to tomcat
     synchronize:
       src: /opt/edu_ansible/target/JenkinsWar.war
-      dest: adm3@81.26.190.181:/tmp/edu_ansible/JenkinsWar.war
+      dest: adm3@81.26.190.181:/usr/local/tomcat/webapps/JenkinsWar.war
       mode: push
       private_key: ~/.ssh/id_rsa
     delegate_to: maven
 
-  - name: Run Tomcat container
-    docker_container:
-      name: tomcat-server
-      image: tomcat:9.0-jre21-temurin
-      ports:
-        - "8080:8080"
-      volumes:
-       - "/tmp/edu_ansible:/usr/local/tomcat/webapps/"
-      state: started
-      restart_policy: always
+  - name: Install Tomcat
+    apt:
+      name: tomcat9
+      state: restarted
 ...
     
