@@ -1,0 +1,62 @@
+---
+- name: build project with Maven
+  hosts: maven
+  become: yes
+
+  tasks:
+  - name: Delete old directory (if it is exist)
+    file:
+      path: /opt/edu_ansible
+      state: absent
+
+  - name: Create new empty directory
+    file:
+      path: /opt/edu_ansible
+      state: directory
+
+  - name: run build war file
+    docker_container:
+      name: maven
+      image: maven:3.9-eclipse-temurin-21
+      working_dir: /tmp/edu_ansible
+      volumes:
+          - "/opt/edu_ansible:/tmp/edu_ansible"
+      command: sh -c "git clone https://github.com/sivajavatechie/JenkinsWar . && mvn package -DskipTests"
+      state: started
+      detach: false
+      cleanup: true
+  
+- name: Deploy WAR to Tomcat on tomcat host
+  hosts: tomcat
+  become: true
+
+  tasks:
+  - name: Delete old directory (if it is exist)
+    file:
+      path: /tmp/edu_ansible
+      state: absent
+
+  - name: Create new empty directory
+    file:
+      path: /tmp/edu_ansible
+      state: directory
+
+  - name: Push WAR from maven to tomcat
+  synchronize:
+      src: /opt/edu_ansible/target/JenkinsWar.war
+      dest: /tmp/edu_ansible/JenkinsWar.war
+      mode: push
+  delegate_to: maven
+
+  - name: Run Tomcat container
+    docker_container:
+      name: tomcat-server
+      image: tomcat:9.0-jre21-temurin
+      ports:
+        - "8080:8080"
+      volumes:
+       - "/tmp/edu_ansible:/usr/local/tomcat/webapps/"
+      state: started
+      restart_policy: always
+...
+    
