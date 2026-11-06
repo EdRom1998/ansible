@@ -14,6 +14,11 @@
       path: /opt/edu_ansible
       state: directory
 
+  - name: Ensure docker is present
+    apt:
+      name: python3-docker
+      state: present
+
   - name: run build war file
     docker_container:
       name: maven
@@ -41,13 +46,18 @@
       path: /tmp/edu_ansible
       state: directory
 
+  - name: Ensure docker is present
+    apt:
+      name: python3-docker
+      state: present
+
   - name: Push WAR from maven to tomcat
-  synchronize:
+    synchronize:
       src: /opt/edu_ansible/target/JenkinsWar.war
       dest: /tmp/edu_ansible/JenkinsWar.war
       mode: push
       private_key: ~/.ssh/id_rsa
-  delegate_to: maven
+    delegate_to: maven
 
   - name: Run Tomcat container
     docker_container:
