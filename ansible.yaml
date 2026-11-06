@@ -51,7 +51,7 @@
   - name: Push WAR from maven to tomcat
     synchronize:
       src: /opt/edu_ansible/target/JenkinsWar.war
-      dest: adm3@81.26.190.181:/usr/local/tomcat/webapps/JenkinsWar.war
+      dest: adm3@81.26.190.181:/var/lib/tomcat9/webapps/JenkinsWar.war
       mode: push
       private_key: ~/.ssh/id_rsa
     delegate_to: maven
