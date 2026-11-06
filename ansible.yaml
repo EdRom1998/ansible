@@ -9,9 +9,8 @@
         name:
           - maven
           - git
-          - openjdk-17-jdk
+          - python
         state: present
-        update_cache: yes
 
     - name: Clean build dir
       file:
@@ -25,7 +24,6 @@
 
     - name: Clone and build WAR
       shell: |
-        set -e
         cd /opt/edu_ansible
         git clone https://github.com/sivajavatechie/JenkinsWar .
         mvn package -DskipTests
@@ -51,7 +49,6 @@
       service:
         name: tomcat9
         state: started
-        enabled: yes
 
     - name: Copy WAR to webapps
       copy:
